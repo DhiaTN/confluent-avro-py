@@ -1,9 +1,15 @@
+import re
 import subprocess
+import sys
 from pathlib import PurePath
 
 from setuptools import find_packages, setup
 from setuptools.command.develop import develop
 from setuptools.command.install import install
+
+if sys.version_info < (3, 5):
+    raise Exception("avrokafka requires Python 3.5 or higher.")
+
 
 __version__ = "1.0.0"
 __author__ = "Dhia Abbassi"
@@ -36,7 +42,7 @@ class PostInstallCommand(install):
 with open(PurePath(base_dir, "README.md")) as f:
     long_description = f.read()
 
-classifiers = (
+classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Development Status :: 4 - Beta",
     "Programming Language :: Python :: 3 :: Only",
@@ -44,9 +50,10 @@ classifiers = (
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Operating System :: OS Independent",
-    "Intended Audience :: Information Technology",
+    "Intended Audience :: Developers",
     "Natural Language :: English",
-)
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 
 setup(
     name="avrokafka",

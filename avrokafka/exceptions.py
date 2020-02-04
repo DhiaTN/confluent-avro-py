@@ -1,6 +1,15 @@
 import json
 
 
+class SerializerError(Exception):
+    def __init__(self, error, message):
+        self.error = str(self.error)
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
+
 class SchemaRegistryError(Exception):
     """Base Schema Registry error"""
 
