@@ -1,7 +1,8 @@
+import json
 from io import BytesIO
 
-import avro.io
-import avro.schema as AvroSchema
+import fastavro
+from fastavro.schema import SchemaParseException as FastavroParseException
 
 
 class SchemaParsingError(Exception):
@@ -10,18 +11,33 @@ class SchemaParsingError(Exception):
     pass
 
 
-def loads(schema_str):
-    """ Parse a schema given a schema string """
+class InvalidWriterStream(Exception):
+    """Error while parsing a JSON schema descriptor."""
+
+    pass
+
+
+class DecodingError(Exception):
+    pass
+
+class EncodingError(Exception):
+    pass
+
+
+def loads(avro_schema: str):
     try:
-        return AvroSchema.Parse(schema_str)
-    except AvroSchema.SchemaParseException as e:
+        schema_json = json.loads(avro_schema)
+        return fastavro.parse_schema(schema_json)
+    except (ValueError, TypeError, FastavroParseException) as e:
         raise SchemaParsingError("Schema parse failed: {}".format(str(e)))
 
 
-def load(fp):
-    """ Parse a schema from a file path """
-    with open(fp) as f:
-        return loads(f.read())
+def load(avro_fp: str):
+    try:
+        with open(avro_fp, "r") as f:
+            return loads(f.read())
+    except FileNotFoundError as e:
+        raise SchemaParsingError("Schema parse failed: {}".format(str(e)))
 
 
 class Decoder(object):
@@ -30,11 +46,14 @@ class Decoder(object):
     def __init__(self, avro_schema: str):
         self.schema_str = avro_schema
         self.schema = loads(avro_schema)
-        self.reader = avro.io.DatumReader(self.schema)
 
-    def decode(self, reader_stream: BytesIO):
-        bin_decoder = avro.io.BinaryDecoder(reader_stream)
-        return self.reader.read(bin_decoder)
+    def decode(self, input_stream: BytesIO):
+        try:
+            return fastavro.schemaless_reader(input_stream, self.schema)
+        except (TypeError, AttributeError) as e:
+            raise DecodingError(
+                "Expected BytesIO as input, fround {}: {}".format(input_stream, str(e))
+            )
 
 
 class Encoder(object):
@@ -43,9 +62,14 @@ class Encoder(object):
     def __init__(self, avro_schema: str):
         self.schema_str = avro_schema
         self.schema = loads(avro_schema)
-        self.writer = avro.io.DatumWriter(self.schema)
 
-    def encode(self, data, writer_stream: BytesIO):
-        encoder = avro.io.BinaryEncoder(writer_stream)
-        self.writer.write(data, encoder)
-        return writer_stream.getvalue()
+    def encode(self, data, output_stream: BytesIO):
+        try:
+            fastavro.schemaless_writer(output_stream, self.schema, data)
+            return output_stream.getvalue()
+        except ValueError as e:
+            raise EncodingError("Data is not valid: {}\n{}".format(data, str(e)))
+        except (TypeError, AttributeError) as e:
+            raise InvalidWriterStream(
+                "Expected BytesIO type, fround {}: {}".format(output_stream, str(e))
+            )

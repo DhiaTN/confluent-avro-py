@@ -1,7 +1,7 @@
 import re
 import subprocess
 import sys
-from pathlib import PurePath
+from pathlib import Path
 
 from setuptools import find_packages, setup
 from setuptools.command.develop import develop
@@ -16,8 +16,7 @@ __author__ = "Dhia Abbassi"
 __email__ = "dhia.absi@gmail.com"
 __license__ = "Apache License 2.0"
 
-packages = find_packages(exclude=["examples"])
-base_dir = PurePath(__file__).parent
+base_dir = Path(__file__).parent
 
 pipenv_command = ["pipenv", "install", "--deploy", "--system"]
 pipenv_command_dev = ["pipenv", "install", "--dev", "--deploy", "--system"]
@@ -39,9 +38,8 @@ class PostInstallCommand(install):
         install.run(self)
 
 
-with open(PurePath(base_dir, "README.md")) as f:
-    long_description = f.read()
-
+README = (base_dir / "README.md").read_text()
+packages = find_packages(exclude=["examples", "tests",])
 classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Development Status :: 4 - Beta",
@@ -63,7 +61,8 @@ setup(
     license=__license__,
     url="https://github.com/DhiaTN/avrokafka-py",
     description="A schema-registry aware avro serde (serializer/deserializer) for Apache Kafka",
-    long_description="\n" + long_description,
+    long_description=README,
+    long_description_content_type="text/markdown",
     packages=packages,
     setup_requires=["pipenv"],
     cmdclass={"develop": PostDevelopCommand, "install": PostInstallCommand},
