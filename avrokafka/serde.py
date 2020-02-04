@@ -1,7 +1,7 @@
 import struct
 from io import BytesIO
 
-from avrokafka import avrolib2 as avrolib
+from avrokafka import avrolib
 from avrokafka.exceptions import SerializerError
 from avrokafka.schemaregistry import SchemaRegistry
 

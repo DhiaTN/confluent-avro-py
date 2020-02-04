@@ -5,7 +5,10 @@ verify_ssl = true
 
 [packages]
 requests = "*"
-avro-python3 = "*"
+fastavro = "*"
+
+[dev-packages]
+bumpversion = "*"
 
 [requires]
 python_version = "3.7"
