@@ -4,11 +4,15 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [packages]
-requests = "*"
+requests = {extras = ["security"],version = "*"}
 fastavro = "*"
 
 [dev-packages]
 bumpversion = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-sugar = "*"
+pytest-xdist = "*"
 
 [requires]
 python_version = "3.7"

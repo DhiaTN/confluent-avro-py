@@ -1,0 +1,10 @@
+{
+  "name": "Employee",
+  "namespace": "avrokafka.tests",
+  "type": "record",
+  "fields": [
+    { "name": "name", "type": "string" },
+    { "name": "age", "type": "int" },
+    { "name": "hours", "type": "float" }
+  ]
+}
