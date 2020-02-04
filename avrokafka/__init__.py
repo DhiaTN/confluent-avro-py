@@ -1,3 +1,1 @@
-"""AvroKafka"""
-
-__version__ = "0.0.1"
+"""A schema-registry aware avro serde (serializer/deserializer) for Apache Kafka"""
