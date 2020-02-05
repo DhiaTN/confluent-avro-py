@@ -20,6 +20,7 @@ class InvalidWriterStream(Exception):
 class DecodingError(Exception):
     pass
 
+
 class EncodingError(Exception):
     pass
 
