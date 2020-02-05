@@ -3,7 +3,7 @@ from io import BytesIO
 
 from avrokafka import avrolib
 from avrokafka.exceptions import SerializerError
-from avrokafka.schemaregistry import SchemaRegistry
+from avrokafka.schema_registry import SchemaRegistry
 
 MAGIC_BYTE = 0
 
@@ -19,7 +19,10 @@ class AvroSerde(object):
     """
 
     def __init__(
-        self, registry_client, topic, naming_strategy=None,
+        self,
+        registry_client: SchemaRegistry,
+        topic: str,
+        naming_strategy: callable = None,
     ):
 
         self.sr = registry_client
@@ -62,13 +65,10 @@ class AvroSerde(object):
         :returns: Encoded record with schema ID as bytes
         :rtype: bytes
         """
-        schema_info = self.sr.get_schema_info(self.subject, avro_schema)
-        schema_id = schema_info.get("id")
-
+        schema_id = self.sr.get_schema_id(self.subject, avro_schema)
         out_stream = BytesIO()
         out_stream.write(struct.pack("b", MAGIC_BYTE))
         out_stream.write(struct.pack(">I", schema_id))
-
         encoder = avrolib.Encoder(avro_schema)
         return encoder.encode(data, out_stream)
 

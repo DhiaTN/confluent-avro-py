@@ -7,8 +7,8 @@ from setuptools import find_packages, setup
 from setuptools.command.develop import develop
 from setuptools.command.install import install
 
-if sys.version_info < (3, 5):
-    raise Exception("avrokafka requires Python 3.5 or higher.")
+if sys.version_info < (3, 6):
+    raise Exception("avrokafka requires Python 3.6 or higher.")
 
 
 __version__ = "1.0.0"
