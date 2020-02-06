@@ -1,14 +1,21 @@
 import json
 
+from functools import lru_cache
+
 import requests
 from requests.adapters import HTTPAdapter
-from requests.auth import AuthBase
 from urllib3.util.retry import Retry
 
 from avrokafka.schema_registry.errors import handle_client_error
+from avrokafka.schema_registry.auth import RegistryAuthBase
 
-HEADERS = {"Content-Type": "application/vnd.schemaregistry.v1+json"}
-RETRIE_POLICY = Retry(
+
+class SchemaRegistryRetry(Retry):
+    pass
+
+
+HEADERS = {"Content-Type": "application/json"}
+RETRY_POLICY = SchemaRegistryRetry(
     total=5,
     backoff_factor=0.3,
     method_whitelist=False,
@@ -20,9 +27,9 @@ class SchemaRegistry(object):
     def __init__(
         self,
         url: str,
-        auth: AuthBase = None,
+        auth: RegistryAuthBase = None,
         schema_id_size: int = 4,
-        retry_policy: Retry = RETRIE_POLICY,
+        retry_policy: SchemaRegistryRetry = RETRY_POLICY,
         headers: dict = HEADERS,
     ):
         self.url = url
@@ -30,12 +37,15 @@ class SchemaRegistry(object):
         self._session = self._build_session(auth, retry_policy, headers)
 
     def _build_session(
-        self, auth: AuthBase, retry_policy: Retry = None, headers: dict = {}
-    ):
+        self,
+        auth: RegistryAuthBase = None,
+        retry_policy: SchemaRegistryRetry = None,
+        headers: dict = {},
+    ) -> requests.Session:
         """
         Provides persistent connection to the schema registry 
-        to be reused for all client interaction. It supports mutiple auth types 
-        and implements rety mechanism.
+        to be reused for all client interaction. It supports multiple auth types
+        and implements retry mechanism.
         return: connection session to the schema registry
         rtype: requests.Session
         """
@@ -49,7 +59,8 @@ class SchemaRegistry(object):
         return session
 
     @handle_client_error
-    def get_schema(self, id: int):
+    @lru_cache(maxsize=None)
+    def get_schema(self, id: int) -> str:
         """
         GET /schemas/ids/(in: id)
         
@@ -61,52 +72,49 @@ class SchemaRegistry(object):
         :rtype: str
         """
 
-        response = self._session.get(
-            url="{url}/schemas/ids/{id}".format(url=self.url, id=id),
-        )
+        response = self._session.get(url=f"{self.url}/schemas/ids/{id}")
         response.raise_for_status()
         return response.json().get("schema")
 
     @handle_client_error
-    def get_schema_id(self, subject: str, schema: dict):
+    @lru_cache(maxsize=None)
+    def get_schema_id(self, subject, schema: str) -> int:
         """
         POST /subjects/(string: subject)
         
-        Check existence of the given `schema` registred under the given `subject`
+        Check existence of the given `schema` registered under the given `subject`
         and returns the schema ID. If schema doesn't exist it raises an error.
         
         :param str subject: subject name
-        :param dict schema: Avro schema to be registered
+        :param str schema: Avro schema to be registered
         :returns: schema_id
         :rtype: int
         """
 
         response = self._session.post(
-            url="{url}/subjects/{subject}".format(url=self.url, subject=subject),
-            data=json.dumps({"schema": schema}),
+            url=f"{self.url}/subjects/{subject}", data=json.dumps({"schema": schema}),
         )
         response.raise_for_status()
         return response.json().get("id")
 
     @handle_client_error
-    def register_schema(self, subject: str, schema: dict):
+    @lru_cache(maxsize=None)
+    def register_schema(self, subject, schema: str) -> int:
         """
         POST /subjects/(string: subject)/versions
 
         Register a schema with the registry under the given subject
-        and returns the schema ID. If the schema is already registred 
+        and returns the schema ID. If the schema is already registered
         it just returns its schema ID. 
         
         :param str subject: subject name
-        :param dict schema: Avro schema to be registered
+        :param str schema: Avro schema to be registered
         :returns: schema_id
         :rtype: int
         """
 
         response = self._session.post(
-            url="{url}/subjects/{subject}/versions".format(
-                url=self.url, subject=subject
-            ),
+            url=f"{self.url}/subjects/{subject}/versions",
             data=json.dumps({"schema": schema}),
         )
         response.raise_for_status()
