@@ -5,7 +5,7 @@ from requests.exceptions import ConnectionError as RequestsConnectionError
 from requests.exceptions import HTTPError, ReadTimeout, Timeout
 
 
-class SchemaRegistryError(Exception): # pragma: no cover 
+class SchemaRegistryError(Exception):  # pragma: no cover
     """Base Schema Registry error"""
 
     def __init__(self, error: dict, message: str, status_code: int = None):
@@ -75,8 +75,7 @@ class ClientHTTPError(object):
             error = self.http_error.response.json()
         except ValueError:
             error = {"message": self.http_error.response.text}
-        error.update({"status_code": self.status_code})
-        return error
+        return {**error, **{"status_code": self.status_code}}
 
 
 def handle_client_error(func):
@@ -84,6 +83,7 @@ def handle_client_error(func):
     def wrapper(*args, **kwargs):
         try:
             response = func(*args, **kwargs)
+            print(func.cache_info())
         except (Timeout, ReadTimeout, RequestsConnectionError) as e:
             raise SchemaRegistryNetworkError(error={"message": e.__doc__})
         except HTTPError as e:
