@@ -26,7 +26,7 @@ def test_get_schema_unauthorized(registry_client):
     schema_id = 1
     responses.add(
         responses.GET,
-        "{}/schemas/ids/{}".format(SCHEMA_REGISTRY_URL, schema_id),
+        f"{SCHEMA_REGISTRY_URL}/schemas/ids/{schema_id}",
         body="401 Authorization Required",
         status=status.HTTP_401_UNAUTHORIZED,
     )
@@ -42,7 +42,7 @@ def test_get_schema_invalid_id(registry_client):
     invalid_schema_id = 345623
     responses.add(
         responses.GET,
-        "{}/schemas/ids/{}".format(SCHEMA_REGISTRY_URL, invalid_schema_id),
+        f"{SCHEMA_REGISTRY_URL}/schemas/ids/{invalid_schema_id}",
         json={"message": "Invalid ID"},
         status=status.HTTP_404_NOT_FOUND,
     )
@@ -58,7 +58,7 @@ def test_get_schema_unknown_error(registry_client):
     schema_id = 1
     responses.add(
         responses.GET,
-        "{}/schemas/ids/{}".format(SCHEMA_REGISTRY_URL, schema_id),
+        f"{SCHEMA_REGISTRY_URL}/schemas/ids/{schema_id}",
         body="504 Gateway Timeout",
         status=status.HTTP_504_GATEWAY_TIMEOUT,
     )
@@ -83,7 +83,7 @@ def test_get_schema_success(registry_client, employee_schema):
     schema_id = 13
     responses.add(
         responses.GET,
-        "{}/schemas/ids/{}".format(SCHEMA_REGISTRY_URL, schema_id),
+        f"{SCHEMA_REGISTRY_URL}/schemas/ids/{schema_id}",
         json={"schema": employee_schema},
         status=status.HTTP_200_OK,
     )
@@ -96,7 +96,7 @@ def test_get_schema_id_invalid_subject(registry_client, employee_schema):
     invalid_subject = "invalid-subject"
     responses.add(
         responses.POST,
-        "{}/subjects/{}".format(SCHEMA_REGISTRY_URL, invalid_subject),
+        f"{SCHEMA_REGISTRY_URL}/subjects/{invalid_subject}",
         json={"message": "Subject not found"},
         status=status.HTTP_404_NOT_FOUND,
     )
@@ -110,7 +110,7 @@ def test_get_schema_id_invalid_subject(registry_client, employee_schema):
 def test_get_schema_id_schema_not_registred(registry_client, employee_schema):
     responses.add(
         responses.POST,
-        "{}/subjects/{}".format(SCHEMA_REGISTRY_URL, SUBJECT),
+        f"{SCHEMA_REGISTRY_URL}/subjects/{SUBJECT}",
         json={"message": "Schema not found"},
         status=status.HTTP_404_NOT_FOUND,
     )
@@ -130,18 +130,19 @@ def test_get_schema_id_success(registry_client, employee_schema):
     }
     responses.add(
         responses.POST,
-        "{}/subjects/{}".format(SCHEMA_REGISTRY_URL, SUBJECT),
+        f"{SCHEMA_REGISTRY_URL}/subjects/{SUBJECT}",
         json=response_mock,
         status=status.HTTP_200_OK,
     )
     schema_id = registry_client.get_schema_id(SUBJECT, employee_schema)
     assert schema_id == response_mock["id"]
 
+
 @responses.activate
 def test_register_schema_version_incompatible(registry_client, employee_schema):
     responses.add(
         responses.POST,
-        "{}/subjects/{}/versions".format(SCHEMA_REGISTRY_URL, SUBJECT),
+        f"{SCHEMA_REGISTRY_URL}/subjects/{SUBJECT}/versions",
         json={"message": "Schema version incompatible"},
         status=status.HTTP_409_CONFLICT,
     )
@@ -157,7 +158,7 @@ def test_register_schema_version_incompatible(registry_client, employee_schema):
 def test_register_schema_schema_invalid(registry_client, employee_schema):
     responses.add(
         responses.POST,
-        "{}/subjects/{}/versions".format(SCHEMA_REGISTRY_URL, SUBJECT),
+        f"{SCHEMA_REGISTRY_URL}/subjects/{SUBJECT}/versions",
         json={"message": "schema invalid"},
         status=422,
     )
@@ -174,7 +175,7 @@ def test_register_schema_success(registry_client, employee_schema):
     new_schema_id = 156
     responses.add(
         responses.POST,
-        "{}/subjects/{}/versions".format(SCHEMA_REGISTRY_URL, SUBJECT),
+        f"{SCHEMA_REGISTRY_URL}/subjects/{SUBJECT}/versions",
         json={"id": new_schema_id},
         status=status.HTTP_200_OK,
     )
