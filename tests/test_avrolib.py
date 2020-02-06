@@ -36,16 +36,16 @@ def test_load_invalid_file_path():
         avrolib.load("invalid_schema")
 
 
-def test_encoder(employee_schema, employee_melissa_avro, employee_melissa):
+def test_encoder_success(employee_schema, employee_avro_data, employee_json_data):
     encoder = avrolib.Encoder(employee_schema)
-    melissa_encoded = encoder.encode(employee_melissa, BytesIO())
-    assert melissa_encoded == employee_melissa_avro
+    melissa_encoded = encoder.encode(employee_json_data, BytesIO())
+    assert melissa_encoded == employee_avro_data
 
 
-def test_encoder_invalid_writer(employee_schema, employee_melissa):
+def test_encoder_invalid_writer(employee_schema, employee_json_data):
     encoder = avrolib.Encoder(employee_schema)
     with pytest.raises(avrolib.InvalidWriterStream):
-        encoder.encode(employee_melissa, StringIO())
+        encoder.encode(employee_json_data, StringIO())
 
 
 def test_encoder_invalid_data(employee_schema):
@@ -54,22 +54,22 @@ def test_encoder_invalid_data(employee_schema):
         encoder.encode({"name": "Mario Bros"}, BytesIO())
 
 
-def test_decoder_success(employee_schema, employee_melissa_avro, employee_melissa):
+def test_decoder_success(employee_schema, employee_avro_data, employee_json_data):
     decoder = avrolib.Decoder(employee_schema)
-    melissa_decoded = decoder.decode(BytesIO(employee_melissa_avro))
-    assert melissa_decoded == employee_melissa
+    melissa_decoded = decoder.decode(BytesIO(employee_avro_data))
+    assert melissa_decoded == employee_json_data
 
 
-def test_decoder_schema_not_compatible(employee_melissa_avro):
+def test_decoder_schema_not_compatible(employee_avro_data):
     employee_schema = (
         '{"name": "random","type": "record", "fileds": {"type": "boolean"}}'
     )
     decoder = avrolib.Decoder(employee_schema)
-    melissa_decoded = decoder.decode(BytesIO(employee_melissa_avro))
+    melissa_decoded = decoder.decode(BytesIO(employee_avro_data))
     assert melissa_decoded == {}
 
 
-def test_decoder_invalid_reader(employee_schema, employee_melissa_avro):
+def test_decoder_invalid_reader(employee_schema, employee_avro_data):
     decoder = avrolib.Decoder(employee_schema)
     with pytest.raises(avrolib.DecodingError):
-        decoder.decode(employee_melissa_avro)
+        decoder.decode(employee_avro_data)
