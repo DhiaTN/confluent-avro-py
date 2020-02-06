@@ -5,24 +5,12 @@ import fastavro
 from fastavro.schema import SchemaParseException as FastavroParseException
 
 
-class SchemaParsingError(Exception):
-    """Error while parsing a JSON schema descriptor."""
-
-    pass
-
-
-class InvalidWriterStream(Exception):
-    """Error while parsing a JSON schema descriptor."""
-
-    pass
-
-
-class DecodingError(Exception):
-    pass
-
-
-class EncodingError(Exception):
-    pass
+from avrokafka.exceptions import (
+    SchemaParsingError,
+    InvalidWriterStream,
+    DecodingError,
+    EncodingError,
+)
 
 
 def loads(avro_schema: str):
@@ -64,7 +52,7 @@ class Encoder(object):
         self.schema_str = avro_schema
         self.schema = loads(avro_schema)
 
-    def encode(self, data, output_stream: BytesIO):
+    def encode(self, data: dict, output_stream: BytesIO):
         try:
             fastavro.schemaless_writer(output_stream, self.schema, data)
             return output_stream.getvalue()
