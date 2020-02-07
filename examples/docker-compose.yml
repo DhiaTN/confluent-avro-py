@@ -1,0 +1,15 @@
+version: '3'
+services:
+  kafka:
+    container_name: avrokafka-test
+    image: landoop/fast-data-dev:latest
+    ports:
+      - "9092:9092"
+      - "8081:8081"
+      - "8082:8082"
+      - "8083:8083"
+      - "2181:2181"
+      - "3030:3030"
+    environment:
+      - ADV_HOST=localhost
+      - RUNNING_SAMPLEDATA=0

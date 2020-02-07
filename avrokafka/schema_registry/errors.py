@@ -97,7 +97,6 @@ def handle_client_error(func):
     def wrapper(*args, **kwargs):
         try:
             response = func(*args, **kwargs)
-            print(func.cache_info())
         except (Timeout, ReadTimeout, RequestsConnectionError) as e:
             raise SchemaRegistryNetworkError(error={"message": e.__doc__})
         except HTTPError as e:
