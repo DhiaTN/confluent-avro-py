@@ -1,5 +1,6 @@
-from avrokafka.schema_registry import client_http, errors
+from avrokafka.schema_registry import client_http
 
 SchemaRegistry = client_http.SchemaRegistry
+SchemaRegistryRetry = client_http.SchemaRegistryRetry
 
-__all__ = ["SchemaRegistry", "errors"]
+__all__ = ["SchemaRegistry", "SchemaRegistryRetry"]

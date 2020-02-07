@@ -1,14 +1,15 @@
 from abc import ABC
+
 from requests.auth import AuthBase, HTTPBasicAuth, HTTPDigestAuth
 
 
 class RegistryAuthBase(AuthBase, ABC):
-    pass
+    """Base class that all RegistryAuth drives from"""
 
 
 class RegistryHTTPBasicAuth(RegistryAuthBase, HTTPBasicAuth):
-    pass
+    """Implements HTTP Basic Authentication"""
 
 
 class RegistryHTTPDigestAuth(RegistryAuthBase, HTTPDigestAuth):
-    pass
+    """Implements HTTP Digest Authentication"""

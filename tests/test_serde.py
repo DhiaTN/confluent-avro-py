@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 
 from avrokafka import avrolib
-from avrokafka.exceptions import SerializerError
+from avrokafka.exceptions import MessageParsingError
 from avrokafka.schema_registry import SchemaRegistry
 from avrokafka.schema_registry.errors import IncompatibleSchemaVersion
 from avrokafka.serde import AvroKeyValueSerde
@@ -26,7 +26,7 @@ def test_value_deserialize_missing_magicbyte(employee_schema, employee_avro_data
     with patch(SCHEMA_REGISTRY_CLS) as mock:
         sr = _schema_registry_mock(mock)
         avroSerde = AvroKeyValueSerde(sr, TOPIC)
-        with pytest.raises(SerializerError) as e:
+        with pytest.raises(MessageParsingError) as e:
             avroSerde.value.deserialize(employee_avro_data)
 
 
@@ -34,7 +34,7 @@ def test_value_deserialize_none(employee_schema, employee_avro_data):
     with patch(SCHEMA_REGISTRY_CLS) as mock:
         sr = _schema_registry_mock(mock)
         avroSerde = AvroKeyValueSerde(sr, TOPIC)
-        with pytest.raises(SerializerError) as e:
+        with pytest.raises(MessageParsingError) as e:
             avroSerde.value.deserialize(None)
 
 

@@ -1,13 +1,12 @@
 import json
-
 from functools import lru_cache
 
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-from avrokafka.schema_registry.errors import handle_client_error
 from avrokafka.schema_registry.auth import RegistryAuthBase
+from avrokafka.schema_registry.errors import handle_client_error
 
 
 class SchemaRegistryRetry(Retry):
@@ -24,6 +23,8 @@ RETRY_POLICY = SchemaRegistryRetry(
 
 
 class SchemaRegistry(object):
+    """HTTP client to connect to interact with schema registry"""
+
     def __init__(
         self,
         url: str,
@@ -40,19 +41,24 @@ class SchemaRegistry(object):
         self,
         auth: RegistryAuthBase = None,
         retry_policy: SchemaRegistryRetry = None,
-        headers: dict = {},
+        headers: dict = None,
     ) -> requests.Session:
         """
         Provides persistent connection to the schema registry 
         to be reused for all client interaction. It supports multiple auth types
         and implements retry mechanism.
-        return: connection session to the schema registry
-        rtype: requests.Session
+
+        :param RegistryAuthBase auth: class handling authorization with schema registry
+        :param SchemaRegistryRetry retry_policy: class that implements retry policy
+        :param dict headers: headers to provide custom request headers
+        :return: connection session to the schema registry
+        :rtype: requests.Session
         """
 
         session = requests.Session()
         session.auth = auth
-        session.headers.update(headers)
+        if headers:
+            session.headers.update(headers)
         if retry_policy:
             adapter = HTTPAdapter(max_retries=retry_policy)
             session.mount(self.url, adapter)
@@ -60,19 +66,18 @@ class SchemaRegistry(object):
 
     @handle_client_error
     @lru_cache(maxsize=None)
-    def get_schema(self, id: int) -> str:
+    def get_schema(self, schema_id: int) -> str:
         """
         GET /schemas/ids/(in: id)
         
-        Retrives the schema descriptor for the given `id`.
+        Retrieves the schema descriptor for the given `id`.
         
-        :param str subject: subject name
-        :param dict schema: Avro schema to be registered
+        :param int schema_id: unique ID of the registered schema
         :returns: schema
         :rtype: str
         """
 
-        response = self._session.get(url=f"{self.url}/schemas/ids/{id}")
+        response = self._session.get(url=f"{self.url}/schemas/ids/{schema_id}")
         response.raise_for_status()
         return response.json().get("schema")
 
