@@ -1,32 +1,44 @@
 import json
-from io import BytesIO
+from io import BytesIO, StringIO
+from typing import Union
 
 import fastavro
 from fastavro.schema import SchemaParseException as FastavroParseException
 
-
 from avrokafka.exceptions import (
-    SchemaParsingError,
-    InvalidWriterStream,
     DecodingError,
     EncodingError,
+    InvalidWriterStream,
+    SchemaParsingError,
 )
 
 
-def loads(avro_schema: str):
+def loads(avro_schema: Union[str, bytes]) -> dict:
+    """Deserialize ``avro_schema`` (a ``str`` or ``bytes`` instance
+    containing a avro schema) to a Python dict
+    :param str avro_schema: An avro schema descriptor (text-like)
+    :returns: Parsed avro schema
+    :rtype: dict
+    """
+
     try:
         schema_json = json.loads(avro_schema)
         return fastavro.parse_schema(schema_json)
     except (ValueError, TypeError, FastavroParseException) as e:
-        raise SchemaParsingError("Schema parse failed: {}".format(str(e)))
+        raise SchemaParsingError(f"Schema parse failed: {e}")
 
 
-def load(avro_fp: str):
+def load(avro_fp: Union[StringIO, BytesIO]) -> dict:
+    """Parse an avro schema from a file-like object
+    :param str|bytes avro_fp: a file-like object containing avro schema
+    :returns: Parsed avro schema
+    :rtype: dict
+    """
+
     try:
-        with open(avro_fp, "r") as f:
-            return loads(f.read())
-    except FileNotFoundError as e:
-        raise SchemaParsingError("Schema parse failed: {}".format(str(e)))
+        return loads(avro_fp.read())
+    except AttributeError as e:
+        raise SchemaParsingError(f"Invalid file descriptor: {e}")
 
 
 class Decoder(object):
@@ -41,7 +53,7 @@ class Decoder(object):
             return fastavro.schemaless_reader(input_stream, self.schema)
         except (TypeError, AttributeError) as e:
             raise DecodingError(
-                "Expected BytesIO as input, fround {}: {}".format(input_stream, str(e))
+                f"Expected BytesIO as input, fround {input_stream}: {e}"
             )
 
 
@@ -57,8 +69,8 @@ class Encoder(object):
             fastavro.schemaless_writer(output_stream, self.schema, data)
             return output_stream.getvalue()
         except ValueError as e:
-            raise EncodingError("Data is not valid: {}\n{}".format(data, str(e)))
+            raise EncodingError(f"Data is not valid: {data}\n{e}")
         except (TypeError, AttributeError) as e:
             raise InvalidWriterStream(
-                "Expected BytesIO type, fround {}: {}".format(output_stream, str(e))
+                f"Expected BytesIO type, fround {output_stream}: {e}"
             )

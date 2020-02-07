@@ -1,4 +1,3 @@
-import re
 import subprocess
 import sys
 from pathlib import Path
@@ -11,7 +10,7 @@ if sys.version_info < (3, 6):
     raise Exception("avrokafka requires Python 3.6 or higher.")
 
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 __author__ = "Dhia Abbassi"
 __email__ = "dhia.absi@gmail.com"
 __license__ = "Apache License 2.0"
@@ -39,14 +38,13 @@ class PostInstallCommand(install):
 
 
 README = (base_dir / "README.md").read_text()
-packages = find_packages(exclude=["examples", "tests",])
+packages = find_packages(exclude=["examples", "tests"])
 classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Development Status :: 4 - Beta",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
     "Operating System :: OS Independent",
     "Intended Audience :: Developers",
     "Natural Language :: English",

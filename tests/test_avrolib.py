@@ -26,12 +26,13 @@ def test_loads_invalid_schema():
 
 
 def test_load_success():
-    schema = avrolib.load(SCHEMA_FILE)
-    assert type(schema) == dict
-    assert schema["name"] == "avrokafka.tests.Employee"
+    with open(SCHEMA_FILE) as avro_fp:
+        schema = avrolib.load(avro_fp)
+        assert type(schema) == dict
+        assert schema["name"] == "avrokafka.tests.Employee"
 
 
-def test_load_invalid_file_path():
+def test_load_invalid_data():
     with pytest.raises(avrolib.SchemaParsingError):
         avrolib.load("invalid_schema")
 

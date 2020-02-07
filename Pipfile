@@ -15,6 +15,7 @@ pytest-cov = "*"
 pytest-sugar = "*"
 pytest-xdist = "*"
 responses = "*"
+black = "==19.10b0"
+isort = "*"
+mypy = "*"
 
-[requires]
-python_version = "3.7"
