@@ -10,7 +10,7 @@ if sys.version_info < (3, 6):
     raise Exception("avrokafka requires Python 3.6 or higher.")
 
 
-__version__ = "1.1.0"
+__version__ = "1.3.0"
 __author__ = "Dhia Abbassi"
 __email__ = "dhia.absi@gmail.com"
 __license__ = "Apache License 2.0"

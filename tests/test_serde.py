@@ -1,12 +1,8 @@
-import struct
-from io import BytesIO
 from unittest.mock import patch
 
 import pytest
 
-from avrokafka import avrolib
 from avrokafka.exceptions import MessageParsingError
-from avrokafka.schema_registry import SchemaRegistry
 from avrokafka.schema_registry.errors import IncompatibleSchemaVersion
 from avrokafka.serde import AvroKeyValueSerde
 
@@ -25,17 +21,17 @@ def _schema_registry_mock(cls_mock, schema_id=None, schema_str=None):
 def test_value_deserialize_missing_magicbyte(employee_schema, employee_avro_data):
     with patch(SCHEMA_REGISTRY_CLS) as mock:
         sr = _schema_registry_mock(mock)
-        avroSerde = AvroKeyValueSerde(sr, TOPIC)
-        with pytest.raises(MessageParsingError) as e:
-            avroSerde.value.deserialize(employee_avro_data)
+        avro_serde = AvroKeyValueSerde(sr, TOPIC)
+        with pytest.raises(MessageParsingError):
+            avro_serde.value.deserialize(employee_avro_data)
 
 
 def test_value_deserialize_none(employee_schema, employee_avro_data):
     with patch(SCHEMA_REGISTRY_CLS) as mock:
         sr = _schema_registry_mock(mock)
-        avroSerde = AvroKeyValueSerde(sr, TOPIC)
-        with pytest.raises(MessageParsingError) as e:
-            avroSerde.value.deserialize(None)
+        avro_serde = AvroKeyValueSerde(sr, TOPIC)
+        with pytest.raises(MessageParsingError):
+            avro_serde.value.deserialize(None)
 
 
 def test_value_deserialize_success(
@@ -44,9 +40,9 @@ def test_value_deserialize_success(
     with patch(SCHEMA_REGISTRY_CLS) as mock:
         schema_id = 23
         sr = _schema_registry_mock(mock, schema_id, employee_schema)
-        avroSerde = AvroKeyValueSerde(sr, TOPIC)
+        avro_serde = AvroKeyValueSerde(sr, TOPIC)
         employee_avro_data = employee_avro_wire_format(schema_id)
-        decoded_data = avroSerde.value.deserialize(employee_avro_data)
+        decoded_data = avro_serde.value.deserialize(employee_avro_data)
         assert decoded_data == employee_json_data
 
 
@@ -56,9 +52,9 @@ def test_value_serialize_incompatible_change(
     with patch(SCHEMA_REGISTRY_CLS) as mock:
         sr = _schema_registry_mock(mock)
         sr.register_schema.side_effect = IncompatibleSchemaVersion({})
-        avroSerde = AvroKeyValueSerde(sr, TOPIC)
+        avro_serde = AvroKeyValueSerde(sr, TOPIC)
         with pytest.raises(IncompatibleSchemaVersion):
-            avroSerde.value.serialize(employee_json_data, employee_schema)
+            avro_serde.value.serialize(employee_json_data, employee_schema)
 
 
 def test_value_serialize_success(
@@ -67,9 +63,9 @@ def test_value_serialize_success(
     with patch(SCHEMA_REGISTRY_CLS) as mock:
         schema_id = 45
         sr = _schema_registry_mock(mock, schema_id, employee_schema)
-        avroSerde = AvroKeyValueSerde(sr, TOPIC)
+        avro_serde = AvroKeyValueSerde(sr, TOPIC)
         employee_avro = employee_avro_wire_format(schema_id)
-        encoded_data = avroSerde.value.serialize(employee_json_data, employee_schema)
+        encoded_data = avro_serde.value.serialize(employee_json_data, employee_schema)
         assert encoded_data == employee_avro
-        decoded_data = avroSerde.value.deserialize(encoded_data)
+        decoded_data = avro_serde.value.deserialize(encoded_data)
         assert decoded_data == employee_json_data

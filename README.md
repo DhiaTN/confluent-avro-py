@@ -1,11 +1,11 @@
 # avrokafka
 
-
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/avrokafka?color=blue&label=Python)](https://pypi.org/project/avrokafka/)
 [![Build Status](https://travis-ci.com/DhiaTN/avrokafka-py.svg?branch=master)](https://travis-ci.com/DhiaTN/avrokafka-py)
 [![Maintainability](https://api.codeclimate.com/v1/badges/cc863ec33bb0cdb7f515/maintainability)](https://codeclimate.com/github/DhiaTN/avrokafka-py/maintainability)
 [![codecov](https://codecov.io/gh/DhiaTN/avrokafka-py/branch/master/graph/badge.svg)](https://codecov.io/gh/DhiaTN/avrokafka-py)
 [![PyPI version](https://badge.fury.io/py/avrokafka.svg)](https://badge.fury.io/py/avrokafka)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![PyPI - License](https://img.shields.io/pypi/l/avrokafka?color=ff69b4&label=License)](https://opensource.org/licenses/Apache-2.0)
 -----------
 A schema-registry aware avro serde (serializer/deserializer) to work with Apache Kafka
 
@@ -16,6 +16,8 @@ pip install avrokafka
 ```
 
 ## Usage:
+
+> Check [examples](examples) for a full working demo.
 
 ##### Consumer App Example:
 
