@@ -9,7 +9,7 @@ docker-compose up -d
 2.Install requirements
 
 ```shell script
-pip install kafka-python avrokafka
+pip install kafka-python confluent_avro
 ```
 3.Run consumer app in tab 1
 

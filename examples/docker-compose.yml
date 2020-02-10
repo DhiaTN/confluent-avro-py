@@ -1,7 +1,7 @@
 version: '3'
 services:
   kafka:
-    container_name: avrokafka-test
+    container_name: confluent_avro-test
     image: landoop/fast-data-dev:latest
     ports:
       - "9092:9092"
