@@ -4,8 +4,8 @@ import random
 
 from kafka import KafkaProducer
 
-from avrokafka.schema_registry import SchemaRegistry
-from avrokafka.serde import AvroKeyValueSerde
+from confluent_avro.schema_registry import SchemaRegistry
+from confluent_avro.serde import AvroKeyValueSerde
 
 SCHEMA_REGISTRY_URL = "http://localhost:8081"
 KAFKA_TOPIC = "telecom_italia_data"
