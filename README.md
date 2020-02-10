@@ -1,11 +1,11 @@
 # confluent-avro
 
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/confluent-avro?label=Python)](https://pypi.org/project/avrokafka/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/confluent_avro?label=Python)](https://pypi.org/project/confluent-avro/)
 [![Build Status](https://travis-ci.com/DhiaTN/avrokafka-py.svg?branch=master)](https://travis-ci.com/DhiaTN/avrokafka-py)
 [![Maintainability](https://api.codeclimate.com/v1/badges/cc863ec33bb0cdb7f515/maintainability)](https://codeclimate.com/github/DhiaTN/avrokafka-py/maintainability)
 [![codecov](https://codecov.io/gh/DhiaTN/avrokafka-py/branch/master/graph/badge.svg)](https://codecov.io/gh/DhiaTN/avrokafka-py)
-[![PyPI version](https://badge.fury.io/py/confluent-avro.svg)](https://badge.fury.io/py/confluent-avro)
-[![PyPI - License](https://img.shields.io/pypi/l/avrokafka?color=ff69b4&label=License)](https://opensource.org/licenses/Apache-2.0)
+[![PyPI version](https://badge.fury.io/py/confluent_avro.svg)](https://badge.fury.io/py/confluent_avro)
+[![PyPI - License](https://img.shields.io/pypi/l/confluent_avro?color=ff69b4&label=License)](https://opensource.org/licenses/Apache-2.0)
 -----------
 
 An Avro SerDe implementation that integrates with the confluent schema registry and serializes and deserializes data according to the defined confluent wire format
