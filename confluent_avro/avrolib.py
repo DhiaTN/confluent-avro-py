@@ -5,7 +5,7 @@ from typing import Union
 import fastavro
 from fastavro.schema import SchemaParseException as FastavroParseException
 
-from avrokafka.exceptions import (
+from confluent_avro.exceptions import (
     DecodingError,
     EncodingError,
     InvalidWriterStream,

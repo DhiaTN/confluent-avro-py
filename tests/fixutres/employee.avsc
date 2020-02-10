@@ -1,6 +1,6 @@
 {
   "name": "Employee",
-  "namespace": "avrokafka.tests",
+  "namespace": "confluent_avro.tests",
   "type": "record",
   "fields": [
     { "name": "name", "type": "string" },

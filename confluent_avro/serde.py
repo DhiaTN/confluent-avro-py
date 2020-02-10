@@ -2,9 +2,9 @@ import struct
 from io import BytesIO
 from typing import Callable, Dict
 
-from avrokafka import avrolib
-from avrokafka.exceptions import MessageParsingError
-from avrokafka.schema_registry import SchemaRegistry
+from confluent_avro import avrolib
+from confluent_avro.exceptions import MessageParsingError
+from confluent_avro.schema_registry import SchemaRegistry
 
 MAGIC_BYTE = 0
 
@@ -28,7 +28,7 @@ class AvroSerde(object):
 
         self.sr = registry_client
         self.subject = naming_strategy(topic)
-        self.data_offset = self.sr.schema_id_size + 1
+        self._data_offset = self.sr.schema_id_size + 1
         self._encoder_map: Dict[int, avrolib.Encoder] = {}
         self._decoder_map: Dict[int, avrolib.Decoder] = {}
 
@@ -47,7 +47,9 @@ class AvroSerde(object):
             raise MessageParsingError("message can't be None Type")
 
         with BytesIO(data) as input_stream:
-            magic, schema_id = struct.unpack(">bI", input_stream.read(self.data_offset))
+            magic, schema_id = struct.unpack(
+                ">bI", input_stream.read(self._data_offset)
+            )
 
             if magic != MAGIC_BYTE:
                 raise MessageParsingError("message does not start with magic byte")
@@ -58,7 +60,8 @@ class AvroSerde(object):
     def serialize(self, data: dict, avro_schema: str) -> bytes:
         """
         Encode `data` with the given avro schema `avro_schema`.
-        If the `avro_schema` is rejected by the schema registry, 
+        Instead of including the full schema in the output, only a schema id generated 
+        by the registry is included. If the `avro_schema` is rejected by the schema registry, 
         the serialization fails. The data encoding follows the schema registry wire format.
         https://docs.confluent.io/current/schema-registry/serializer-formatter.html#wire-format
         

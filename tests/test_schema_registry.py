@@ -2,8 +2,8 @@ import pytest
 import responses
 import status
 
-from avrokafka.schema_registry import SchemaRegistry
-from avrokafka.schema_registry.errors import (
+from confluent_avro.schema_registry import SchemaRegistry
+from confluent_avro.schema_registry.errors import (
     IncompatibleSchemaVersion,
     InvalidAvroSchema,
     SchemaNotFoundError,
@@ -13,7 +13,7 @@ from avrokafka.schema_registry.errors import (
 )
 
 SCHEMA_REGISTRY_URL = "https://test.registry.io"
-SUBJECT = "avrokafka-test-employee-value"
+SUBJECT = "confluent_avro-test-employee-value"
 
 
 @pytest.fixture

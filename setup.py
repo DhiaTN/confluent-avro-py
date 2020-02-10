@@ -7,7 +7,7 @@ from setuptools.command.develop import develop
 from setuptools.command.install import install
 
 if sys.version_info < (3, 6):
-    raise Exception("avrokafka requires Python 3.6 or higher.")
+    raise Exception("confluent_avro requires Python 3.6 or higher.")
 
 
 __version__ = "1.3.0"
@@ -52,13 +52,13 @@ classifiers = [
 ]
 
 setup(
-    name="avrokafka",
+    name="confluent-avro",
     version=__version__,
     author=__author__,
     author_email=__email__,
     license=__license__,
-    url="https://github.com/DhiaTN/avrokafka-py",
-    description="A schema-registry aware avro serde (serializer/deserializer) for Apache Kafka",
+    url="https://github.com/DhiaTN/confluent-avro-py",
+    description="An Avro SerDe implementation that integrates with the confluent schema registry and serializes and deserializes data according to the defined confluent wire format",
     long_description=README,
     long_description_content_type="text/markdown",
     packages=packages,
