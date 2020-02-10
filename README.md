@@ -1,18 +1,19 @@
-# avrokafka
+# confluent-avro
 
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/avrokafka?color=blue&label=Python)](https://pypi.org/project/avrokafka/)
 [![Build Status](https://travis-ci.com/DhiaTN/avrokafka-py.svg?branch=master)](https://travis-ci.com/DhiaTN/avrokafka-py)
 [![Maintainability](https://api.codeclimate.com/v1/badges/cc863ec33bb0cdb7f515/maintainability)](https://codeclimate.com/github/DhiaTN/avrokafka-py/maintainability)
 [![codecov](https://codecov.io/gh/DhiaTN/avrokafka-py/branch/master/graph/badge.svg)](https://codecov.io/gh/DhiaTN/avrokafka-py)
-[![PyPI version](https://badge.fury.io/py/avrokafka.svg)](https://badge.fury.io/py/avrokafka)
+[![PyPI version](https://badge.fury.io/py/confluent-avro.svg)](https://badge.fury.io/py/confluent-avro)
 [![PyPI - License](https://img.shields.io/pypi/l/avrokafka?color=ff69b4&label=License)](https://opensource.org/licenses/Apache-2.0)
 -----------
-A schema-registry aware avro serde (serializer/deserializer) to work with Apache Kafka
+
+An Avro SerDe implementation that integrates with the confluent schema registry and serializes and deserializes data according to the defined confluent wire format
 
 ## Installation
 
 ```shell script
-pip install avrokafka
+pip install confluent-avro
 ```
 
 ## Usage:
@@ -24,11 +25,11 @@ pip install avrokafka
 ```python
 from kafka import KafkaConsumer
 
-from avrokafka.schema_registry import SchemaRegistry
-from avrokafka.schema_registry.auth import RegistryHTTPBasicAuth
-from avrokafka.serde import AvroKeyValueSerde
+from confluent_avro.schema_registry import SchemaRegistry
+from confluent_avro.schema_registry.auth import RegistryHTTPBasicAuth
+from confluent_avro.serde import AvroKeyValueSerde
 
-KAFKA_TOPIC = "avrokafka-example-topic"
+KAFKA_TOPIC = "confluent_avro-example-topic"
 
 registry_client = SchemaRegistry(
     "https://myschemaregistry.com",
@@ -54,11 +55,11 @@ for msg in consumer:
 ```python
 from kafka import KafkaProducer
 
-from avrokafka.schema_registry import SchemaRegistry
-from avrokafka.schema_registry.auth import RegistryHTTPBasicAuth
-from avrokafka.serde import AvroKeyValueSerde
+from confluent_avro.schema_registry import SchemaRegistry
+from confluent_avro.schema_registry.auth import RegistryHTTPBasicAuth
+from confluent_avro.serde import AvroKeyValueSerde
 
-KAFKA_TOPIC = "avrokafka-example-topic"
+KAFKA_TOPIC = "confluent_avro-example-topic"
 
 registry_client = SchemaRegistry(
     "https://myschemaregistry.com",
