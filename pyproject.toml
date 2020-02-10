@@ -1,0 +1,47 @@
+[build-system]
+requires = ["flit_core >=2,<3"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+module = "confluent_avro"
+author = "Dhia Abbassi"
+author-email = "dhia.absi@gmail.com"
+home-page = "https://github.com/DhiaTN/confluent-avro-py"
+keywords="avro,kafka,confluent,schema registry"
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development",
+    "Typing :: Typed",
+]
+requires = [
+    "requests[security] >=2.22.0",
+    "fastavro >=0.22.9",
+    "python-status >=1.0.1"
+]
+description-file = "README.md"
+requires-python = ">=3.6"
+
+[tool.flit.metadata.requires-extra]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-sugar",
+    "pytest-xdist",
+    "responses",
+]
+dev = [
+    "bumpversion",
+    "black ==19.10b0",
+    "isort",
+    "mypy",
+]

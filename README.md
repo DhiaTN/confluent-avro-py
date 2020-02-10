@@ -1,6 +1,6 @@
 # confluent-avro
 
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/avrokafka?color=blue&label=Python)](https://pypi.org/project/avrokafka/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/confluent-avro?label=Python)](https://pypi.org/project/avrokafka/)
 [![Build Status](https://travis-ci.com/DhiaTN/avrokafka-py.svg?branch=master)](https://travis-ci.com/DhiaTN/avrokafka-py)
 [![Maintainability](https://api.codeclimate.com/v1/badges/cc863ec33bb0cdb7f515/maintainability)](https://codeclimate.com/github/DhiaTN/avrokafka-py/maintainability)
 [![codecov](https://codecov.io/gh/DhiaTN/avrokafka-py/branch/master/graph/badge.svg)](https://codecov.io/gh/DhiaTN/avrokafka-py)
