@@ -9,17 +9,13 @@ tests:  ## Run tests and save coverage report to htmlcov
 	@pytest -n 4 --cov-report html:htmlcov --cov=$(PACKAGE)
 
 install: clean  ## Install the package, w/dependencies
-	@python setup.py install
+	@flit install
 
 develop: clean ## Install the package in "Development Mode", w/dependencies
-	@python setup.py develop
+	@flit install -s
 
 uninstall: clean  ## Uninstall the package, w/o dependencies
 	@pip uninstall $(PACKAGE)
-
-deps-check:  ## Check outdated packages and security updates
-	@pipenv update --dry-run  # Check outdated packages
-	@pipenv check # Check security updates
 
 clean: clean-build clean-test ## Remove all build, test and coverage artifacts
 
