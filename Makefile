@@ -1,6 +1,6 @@
 .DEFAULT_GOAL:=help
 .PHONY: help tests install develop uninstall deps-check clean clean-build clean-test format lint
-PACKAGE="avrokafka"
+PACKAGE="confluent_avro"
 
 help:  ## Display this help menu
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
@@ -38,12 +38,12 @@ clean-test: ## Remove test and coverage artifacts
 
 lint: ## Check code style and typing annotations
 	@echo "Running code-style check..."
-	@isort --check-only -rc avrokafka tests # Run code style checks
-	@black --check avrokafka tests # Run code style checks
+	@isort --check-only -rc confluent_avro tests # Run code style checks
+	@black --check confluent_avro tests # Run code style checks
 	@echo "Running static-type checker..."
-	@mypy avrokafka tests # Run compile-time type checking (PEP 484)
+	@mypy confluent_avro tests # Run compile-time type checking (PEP 484)
 
-format: ## Check the code style, sort imports and write the files back
-	@isort -ac -rc avrokafka tests
-	@black avrokafka tests
+reformat: ## Check the code style, sort imports and write the files back
+	@isort -ac -rc confluent_avro tests
+	@black confluent_avro tests
 
