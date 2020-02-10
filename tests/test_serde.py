@@ -2,12 +2,12 @@ from unittest.mock import patch
 
 import pytest
 
-from avrokafka.exceptions import MessageParsingError
-from avrokafka.schema_registry.errors import IncompatibleSchemaVersion
-from avrokafka.serde import AvroKeyValueSerde
+from confluent_avro.exceptions import MessageParsingError
+from confluent_avro.schema_registry.errors import IncompatibleSchemaVersion
+from confluent_avro.serde import AvroKeyValueSerde
 
-TOPIC = "avrokafka-test-employee"
-SCHEMA_REGISTRY_CLS = "avrokafka.schema_registry.SchemaRegistry"
+TOPIC = "confluent_avro-test-employee"
+SCHEMA_REGISTRY_CLS = "confluent_avro.schema_registry.SchemaRegistry"
 
 
 def _schema_registry_mock(cls_mock, schema_id=None, schema_str=None):

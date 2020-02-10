@@ -5,8 +5,8 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-from avrokafka.schema_registry.auth import RegistryAuthBase
-from avrokafka.schema_registry.errors import handle_client_error
+from confluent_avro.schema_registry.auth import RegistryAuthBase
+from confluent_avro.schema_registry.errors import handle_client_error
 
 
 class SchemaRegistryRetry(Retry):
@@ -33,6 +33,12 @@ class SchemaRegistry(object):
         retry_policy: SchemaRegistryRetry = RETRY_POLICY,
         headers: dict = HEADERS,
     ):
+        if not url.startswith("http"):
+            raise ValueError(
+                f"Invalid URL '{url}': No schema supplied. "
+                f"Perhaps you meant http(s)://{url}?"
+            )
+
         self.url = url
         self.schema_id_size = schema_id_size
         self._session = self._build_session(auth, retry_policy, headers)
@@ -87,8 +93,8 @@ class SchemaRegistry(object):
         """
         POST /subjects/(string: subject)
         
-        Check existence of the given `schema` registered under the given `subject`
-        and returns the schema ID. If schema doesn't exist it raises an error.
+        Check if the given `schema` is registered under the given `subject`
+        and returns it's schema ID. If schema doesn't exist it raises an error.
         
         :param str subject: subject name
         :param str schema: Avro schema to be registered
@@ -109,8 +115,8 @@ class SchemaRegistry(object):
         POST /subjects/(string: subject)/versions
 
         Register a schema with the registry under the given subject
-        and returns the schema ID. If the schema is already registered
-        it just returns its schema ID. 
+        and returns the schema ID. Registering the same schema twice is idempotent, 
+        so if the schema is already registered it just returns its schema ID. 
         
         :param str subject: subject name
         :param str schema: Avro schema to be registered

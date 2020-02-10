@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from avrokafka import avrolib
+from confluent_avro import avrolib
 
 SCHEMA_FILE = Path(__file__).parent / "fixutres/employee.avsc"
 
@@ -11,7 +11,7 @@ SCHEMA_FILE = Path(__file__).parent / "fixutres/employee.avsc"
 def test_loads_success(employee_schema):
     schema = avrolib.loads(employee_schema)
     assert type(schema) == dict
-    assert schema["name"] == "avrokafka.tests.Employee"
+    assert schema["name"] == "confluent_avro.tests.Employee"
 
 
 def test_loads_type_error():
@@ -29,7 +29,7 @@ def test_load_success():
     with open(SCHEMA_FILE) as avro_fp:
         schema = avrolib.load(avro_fp)
         assert type(schema) == dict
-        assert schema["name"] == "avrokafka.tests.Employee"
+        assert schema["name"] == "confluent_avro.tests.Employee"
 
 
 def test_load_invalid_data():
