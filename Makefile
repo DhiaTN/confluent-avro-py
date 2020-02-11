@@ -9,10 +9,10 @@ tests:  ## Run tests and save coverage report to htmlcov
 	@pytest -n 4 --cov-report html:htmlcov --cov=$(PACKAGE)
 
 install: clean  ## Install the package, w/dependencies
-	@flit install
+	@pip install .
 
 develop: clean ## Install the package in "Development Mode", w/dependencies
-	@flit install -s
+	@pip install .[dev,test]
 
 uninstall: clean  ## Uninstall the package, w/o dependencies
 	@pip uninstall $(PACKAGE)
@@ -42,4 +42,5 @@ lint: ## Check code style and typing annotations
 reformat: ## Check the code style, sort imports and write the files back
 	@isort -ac -rc confluent_avro tests
 	@black confluent_avro tests
+	@mypy confluent_avro tests
 

@@ -10,8 +10,7 @@ python:
     - "3.8"
 
 install:
-    - pip install flit
-    - make develop
+    - pip install .[all]
 
 before_script:
     - make lint
