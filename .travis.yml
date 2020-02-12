@@ -10,7 +10,7 @@ python:
     - "3.8"
 
 install:
-    - pip install .[all]
+    - make develop
 
 before_script:
     - make lint

@@ -17,6 +17,16 @@ class SchemaRegistryError(Exception):  # pragma: no cover
         return f"<{self.__class__.name} msg={self.message}>"
 
 
+class InvalidCompatibilityLevel(Exception):
+    """Invalid compatibility level"""
+
+    def __init__(self):
+        self.message = (
+            "Invalid compatibility level. "
+            "Expected member of `schema_registry.CompatibilityLevel`"
+        )
+
+
 class SchemaRegistryNetworkError(SchemaRegistryError):
     """Connection to host failed or timed out"""
 
