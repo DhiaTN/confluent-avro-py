@@ -4,4 +4,10 @@ schema registry and serializes and deserializes data according
 to the defined confluent wire format
 """
 
-__version__ = "1.6.0"
+
+from confluent_avro.schema_registry import SchemaRegistry
+from confluent_avro.serde import AvroKeySerde, AvroKeyValueSerde, AvroValueSerde
+
+__all__ = ["AvroKeySerde", "AvroValueSerde", "AvroKeyValueSerde", "SchemaRegistry"]
+
+__version__ = "1.7.0"

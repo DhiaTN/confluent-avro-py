@@ -5,9 +5,6 @@ class MessageParsingError(Exception):
         self.error = error
         self.message = message
 
-    def __repr__(self):
-        return self.message
-
 
 class SchemaParsingError(Exception):
     """Error while parsing a JSON schema descriptor."""

@@ -2,10 +2,11 @@ import pytest
 import responses
 import status
 
-from confluent_avro.schema_registry import SchemaRegistry
+from confluent_avro.schema_registry import CompatibilityLevel, SchemaRegistry
 from confluent_avro.schema_registry.errors import (
     IncompatibleSchemaVersion,
     InvalidAvroSchema,
+    InvalidCompatibilityLevel,
     SchemaNotFoundError,
     SchemaRegistryNetworkError,
     SchemaRegistryUnavailable,
@@ -19,6 +20,11 @@ SUBJECT = "confluent_avro-test-employee-value"
 @pytest.fixture
 def registry_client():
     return SchemaRegistry(SCHEMA_REGISTRY_URL)
+
+
+def test_registry_client_invalid_url():
+    with pytest.raises(ValueError):
+        SchemaRegistry("test.registry.io")
 
 
 @responses.activate
@@ -181,3 +187,63 @@ def test_register_schema_success(registry_client, employee_schema):
     )
     schema_id = registry_client.register_schema(SUBJECT, employee_schema)
     assert schema_id == new_schema_id
+
+
+@responses.activate
+def test_get_default_compatibility_success(registry_client):
+    responses.add(
+        responses.GET,
+        f"{SCHEMA_REGISTRY_URL}/config",
+        json={"compatibility": "forward"},
+        status=status.HTTP_200_OK,
+    )
+    compatibility = registry_client.get_default_compatibility()
+    assert compatibility == CompatibilityLevel.FORWARD
+
+
+@responses.activate
+def test_get_subject_compatibility_success(registry_client):
+    subject_name = "subject_x"
+    responses.add(
+        responses.GET,
+        f"{SCHEMA_REGISTRY_URL}/config/{subject_name}",
+        json={"compatibility": "full"},
+        status=status.HTTP_200_OK,
+    )
+    compatibility = registry_client.get_subject_compatibility(subject_name)
+    assert compatibility == CompatibilityLevel.FULL
+
+
+@responses.activate
+def test_set_default_compatibility_success(registry_client):
+    responses.add(
+        responses.PUT,
+        f"{SCHEMA_REGISTRY_URL}/config",
+        json={"compatibility": "forward_transitive"},
+        status=status.HTTP_200_OK,
+    )
+    registry_client.set_default_compatibility(CompatibilityLevel.FORWARD_TRANSITIVE)
+
+
+def test_set_default_compatibility_invalid_level(registry_client):
+    with pytest.raises(InvalidCompatibilityLevel):
+        registry_client.set_default_compatibility("random_value")
+
+
+@responses.activate
+def test_set_subject_compatibility_success(registry_client):
+    subject_name = "subject_x"
+    responses.add(
+        responses.PUT,
+        f"{SCHEMA_REGISTRY_URL}/config/{subject_name}",
+        json={"compatibility": "full_transitive"},
+        status=status.HTTP_200_OK,
+    )
+    registry_client.set_subject_compatibility(
+        subject_name, CompatibilityLevel.FULL_TRANSITIVE
+    )
+
+
+def test_set_subject_compatibility_invalid_level(registry_client):
+    with pytest.raises(InvalidCompatibilityLevel):
+        registry_client.set_subject_compatibility("random_subject", "random_value")

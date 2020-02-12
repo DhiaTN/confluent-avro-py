@@ -1,3 +1,4 @@
+import enum
 import json
 from functools import lru_cache
 
@@ -6,7 +7,10 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 from confluent_avro.schema_registry.auth import RegistryAuthBase
-from confluent_avro.schema_registry.errors import handle_client_error
+from confluent_avro.schema_registry.errors import (
+    InvalidCompatibilityLevel,
+    handle_client_error,
+)
 
 
 class SchemaRegistryRetry(Retry):
@@ -20,6 +24,23 @@ RETRY_POLICY = SchemaRegistryRetry(
     method_whitelist=False,
     raise_on_status=(500, 502, 503, 504),
 )
+
+
+class CompatibilityLevel(enum.Enum):
+    """An enumeration of different compatibility
+    levels supported by the schema registry
+    """
+
+    BACKWARD = "backward"
+    BACKWARD_TRANSITIVE = "backward_transitive"
+    FORWARD = "forward"
+    FORWARD_TRANSITIVE = "forward_transitive"
+    FULL = "full"
+    FULL_TRANSITIVE = "full_transitive"
+    NONE = "none"
+
+    def __str__(self):
+        return self.name
 
 
 class SchemaRegistry(object):
@@ -130,3 +151,43 @@ class SchemaRegistry(object):
         )
         response.raise_for_status()
         return response.json().get("id")
+
+    def __get_compatibility(self, subject: str = None) -> CompatibilityLevel:
+        config_api = f"{self.url}/config"
+        if subject:
+            config_api = f"{config_api}/{subject}"
+        response = requests.get(url=config_api)
+        response.raise_for_status()
+        compatibility = response.json().get("compatibility")
+        return CompatibilityLevel(compatibility.lower())
+
+    def __set_compatibility(
+        self, compatibility: CompatibilityLevel, subject: str = None
+    ):
+        if not isinstance(compatibility, CompatibilityLevel):
+            raise InvalidCompatibilityLevel()
+        config_api = f"{self.url}/config"
+        if subject:
+            config_api = f"{config_api}/{subject}"
+        response = requests.put(
+            url=config_api, data=json.dumps({"compatibility": str(compatibility)}),
+        )
+        response.raise_for_status()
+
+    @handle_client_error
+    def get_default_compatibility(self) -> CompatibilityLevel:
+        return self.__get_compatibility()
+
+    @handle_client_error
+    def get_subject_compatibility(self, subject: str) -> CompatibilityLevel:
+        return self.__get_compatibility(subject)
+
+    @handle_client_error
+    def set_default_compatibility(self, compatibility: CompatibilityLevel):
+        return self.__set_compatibility(compatibility)
+
+    @handle_client_error
+    def set_subject_compatibility(
+        self, subject: str, compatibility: CompatibilityLevel
+    ):
+        return self.__set_compatibility(compatibility, subject)
