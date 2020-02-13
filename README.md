@@ -38,7 +38,8 @@ The underline API will automatically register new schemas used for the data seri
 » The ConfluentAvro's bullet points:
 
 - Supports the confluent wire format
-- Integrates with the confluent schema registry 
+- Integrates with the confluent schema registry
+- Retries with exponential backoff if connection to registry failed
 - Implements caching at the schema registry level
 - The underline decoder/encoder is built once for the same schema and reused for all upcoming records 
 - Can be integrated with different Kafka clients
@@ -52,7 +53,7 @@ The underline API will automatically register new schemas used for the data seri
 ### Installation
 
 ```shell script
-» pip install confluent_avro
+» pip install confluent-avro
 ```
 
 ### Usage
@@ -64,15 +65,14 @@ The underline API will automatically register new schemas used for the data seri
 ```python
 from kafka import KafkaConsumer
 
-from confluent_avro.schema_registry import SchemaRegistry
-from confluent_avro.schema_registry.auth import RegistryHTTPBasicAuth
-from confluent_avro.serde import AvroKeyValueSerde
+from confluent_avro import AvroKeyValueSerde, SchemaRegistry
+from confluent_avro.schema_registry import HTTPBasicAuth
 
 KAFKA_TOPIC = "confluent_avro-example-topic"
 
 registry_client = SchemaRegistry(
     "https://myschemaregistry.com",
-    RegistryHTTPBasicAuth("username", "password"),
+    HTTPBasicAuth("username", "password"),
     headers={"Content-Type": "application/vnd.schemaregistry.v1+json"},
 )
 avroSerde = AvroKeyValueSerde(registry_client, KAFKA_TOPIC)
@@ -94,15 +94,14 @@ for msg in consumer:
 ```python
 from kafka import KafkaProducer
 
-from confluent_avro.schema_registry import SchemaRegistry
-from confluent_avro.schema_registry.auth import RegistryHTTPBasicAuth
-from confluent_avro.serde import AvroKeyValueSerde
+from confluent_avro import AvroKeyValueSerde, SchemaRegistry
+from confluent_avro.schema_registry import HTTPBasicAuth
 
 KAFKA_TOPIC = "confluent_avro-example-topic"
 
 registry_client = SchemaRegistry(
     "https://myschemaregistry.com",
-    RegistryHTTPBasicAuth("username", "password"),
+    HTTPBasicAuth("username", "password"),
     headers={"Content-Type": "application/vnd.schemaregistry.v1+json"},
 )
 
