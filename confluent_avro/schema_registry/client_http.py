@@ -1,20 +1,28 @@
 import enum
 import json
 from functools import lru_cache
+from urllib.parse import urljoin
 
-import requests
+from requests import Session
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 from confluent_avro.schema_registry.auth import RegistryAuthBase
-from confluent_avro.schema_registry.errors import (
-    InvalidCompatibilityLevel,
-    handle_client_error,
-)
+from confluent_avro.schema_registry.errors import handle_client_error
 
 
 class SchemaRegistryRetry(Retry):
     pass
+
+
+class SchemaRegistrySession(Session):
+    def __init__(self, base_url: str):
+        self.base_url = base_url
+        super(SchemaRegistrySession, self).__init__()
+
+    def request(self, method, url, *args, **kwargs):
+        url = urljoin(self.base_url, url)
+        return super(SchemaRegistrySession, self).request(method, url, *args, **kwargs)
 
 
 HEADERS = {"Content-Type": "application/json"}
@@ -69,7 +77,7 @@ class SchemaRegistry(object):
         auth: RegistryAuthBase = None,
         retry_policy: SchemaRegistryRetry = None,
         headers: dict = None,
-    ) -> requests.Session:
+    ) -> SchemaRegistrySession:
         """
         Provides persistent connection to the schema registry 
         to be reused for all client interaction. It supports multiple auth types
@@ -79,10 +87,10 @@ class SchemaRegistry(object):
         :param SchemaRegistryRetry retry_policy: class that implements retry policy
         :param dict headers: headers to provide custom request headers
         :return: connection session to the schema registry
-        :rtype: requests.Session
+        :rtype: SchemaRegistrySession
         """
 
-        session = requests.Session()
+        session = SchemaRegistrySession(self.url)
         session.auth = auth
         if headers:
             session.headers.update(headers)
@@ -104,7 +112,7 @@ class SchemaRegistry(object):
         :rtype: str
         """
 
-        response = self._session.get(url=f"{self.url}/schemas/ids/{schema_id}")
+        response = self._session.get(url=f"/schemas/ids/{schema_id}")
         response.raise_for_status()
         return response.json().get("schema")
 
@@ -124,7 +132,7 @@ class SchemaRegistry(object):
         """
 
         response = self._session.post(
-            url=f"{self.url}/subjects/{subject}", data=json.dumps({"schema": schema}),
+            url=f"/subjects/{subject}", data=json.dumps({"schema": schema}),
         )
         response.raise_for_status()
         return response.json().get("id")
@@ -146,30 +154,27 @@ class SchemaRegistry(object):
         """
 
         response = self._session.post(
-            url=f"{self.url}/subjects/{subject}/versions",
-            data=json.dumps({"schema": schema}),
+            url=f"/subjects/{subject}/versions", data=json.dumps({"schema": schema}),
         )
         response.raise_for_status()
         return response.json().get("id")
 
     def __get_compatibility(self, subject: str = None) -> CompatibilityLevel:
-        config_api = f"{self.url}/config"
+        config_api = f"/config"
         if subject:
-            config_api = f"{config_api}/{subject}"
-        response = requests.get(url=config_api)
+            config_api = f"/config/{subject}"
+        response = self._session.get(url=config_api)
         response.raise_for_status()
-        compatibility = response.json().get("compatibility")
-        return CompatibilityLevel(compatibility.lower())
+        level = response.json().get("compatibilityLevel", "")
+        return CompatibilityLevel(level.lower())
 
     def __set_compatibility(
         self, compatibility: CompatibilityLevel, subject: str = None
     ):
-        if not isinstance(compatibility, CompatibilityLevel):
-            raise InvalidCompatibilityLevel()
-        config_api = f"{self.url}/config"
+        config_api = f"/config"
         if subject:
-            config_api = f"{config_api}/{subject}"
-        response = requests.put(
+            config_api = f"/config/{subject}"
+        response = self._session.put(
             url=config_api, data=json.dumps({"compatibility": str(compatibility)}),
         )
         response.raise_for_status()
