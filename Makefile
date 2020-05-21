@@ -6,12 +6,12 @@ help:  ## Display this help menu
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
 tests:  ## Run tests and save coverage report to htmlcov
-	@pytest -n 4 --cov-report html:htmlcov --cov=$(PACKAGE)
+	@pytest --cov-report html:htmlcov --cov=$(PACKAGE)
 
 install: clean  ## Install the package, w/dependencies
 	@pip install .
 
-develop: clean ## Install the package in "Development Mode", w/dependencies
+setup: clean ## Install the package for development, w/dependencies
 	@pip install .[dev,test]
 
 uninstall: clean  ## Uninstall the package, w/o dependencies
@@ -39,7 +39,7 @@ lint: ## Check code style and typing annotations
 	@echo "Running static-type checker..."
 	@mypy confluent_avro tests # Run compile-time type checking (PEP 484)
 
-reformat: ## Check the code style, sort imports and write the files back
+fmt: ## Check the code style, sort imports and write the files back
 	@isort -ac -rc confluent_avro tests
 	@black confluent_avro tests
 	@mypy confluent_avro tests

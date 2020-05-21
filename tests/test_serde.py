@@ -69,3 +69,30 @@ def test_value_serialize_success(
         assert encoded_data == employee_avro
         decoded_data = avro_serde.value.deserialize(encoded_data)
         assert decoded_data == employee_json_data
+
+
+@patch("confluent_avro.serde.avrolib.Decoder")
+def test_cached_decoder(
+    decoder_mock, employee_schema, employee_avro_wire_format, employee_json_data
+):
+    with patch(SCHEMA_REGISTRY_CLS) as mock:
+        schema_id = 45
+        sr = _schema_registry_mock(mock, schema_id, employee_schema)
+        avro_serde = AvroKeyValueSerde(sr, TOPIC)
+        encoded_data = avro_serde.value.serialize(employee_json_data, employee_schema)
+        avro_serde.value.deserialize(encoded_data)
+        avro_serde.value.deserialize(encoded_data)
+        decoder_mock.assert_called_once()
+
+
+@patch("confluent_avro.serde.avrolib.Encoder")
+def test_cached_encoder_success(
+    encoder_mock, employee_schema, employee_avro_wire_format, employee_json_data
+):
+    with patch(SCHEMA_REGISTRY_CLS) as mock:
+        schema_id = 45
+        sr = _schema_registry_mock(mock, schema_id, employee_schema)
+        avro_serde = AvroKeyValueSerde(sr, TOPIC)
+        avro_serde.value.serialize(employee_json_data, employee_schema)
+        avro_serde.value.serialize(employee_json_data, employee_schema)
+        encoder_mock.assert_called_once()

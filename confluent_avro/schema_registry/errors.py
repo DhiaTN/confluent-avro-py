@@ -5,7 +5,7 @@ from requests.exceptions import ConnectionError as RequestsConnectionError
 from requests.exceptions import HTTPError, ReadTimeout, Timeout
 
 
-class SchemaRegistryError(Exception):  # pragma: no cover
+class SchemaRegistryError(Exception):
     """Base class for all Schema Registry error"""
 
     def __init__(self, error: dict, message: str, status_code: int = None):
@@ -13,18 +13,8 @@ class SchemaRegistryError(Exception):  # pragma: no cover
         self.message = message
         self.status_code = status_code
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return f"<{self.__class__.name} msg={self.message}>"
-
-
-class InvalidCompatibilityLevel(Exception):
-    """Invalid compatibility level"""
-
-    def __init__(self):
-        self.message = (
-            "Invalid compatibility level. "
-            "Expected member of `schema_registry.CompatibilityLevel`"
-        )
 
 
 class SchemaRegistryNetworkError(SchemaRegistryError):
@@ -63,20 +53,21 @@ class IncompatibleSchemaVersion(SchemaRegistryError):
         self.status_code = status.HTTP_409_CONFLICT
 
 
-class InvalidAvroSchema(SchemaRegistryError):
-    """Schema is not a valid avro schema"""
+class DataProcessingError(SchemaRegistryError):
+    """The payload format is valid but the data value 
+    is not accepted by the server."""
 
     def __init__(self, error):
-        self.message = "Input schema is an invalid Avro schema"
+        self.message = "Data sent can't be processed."
         self.client_error = error
         self.status_code = status.HTTP_400_BAD_REQUEST
 
 
-class SchemaNotFoundError(SchemaRegistryError):
-    """Schema or subject not found"""
+class NotFoundError(SchemaRegistryError):
+    """Schema, subject or related configuration not found"""
 
     def __init__(self, error):
-        self.message = error.get("message", "Schema not found")
+        self.message = error.get("message", "Resource not found")
         self.client_error = error
         self.status_code = status.HTTP_404_NOT_FOUND
 
@@ -117,13 +108,17 @@ def handle_client_error(func):
             ]:
                 raise UnauthorizedAccess(client_error.details)
             if client_error.status_code == status.HTTP_404_NOT_FOUND:
-                raise SchemaNotFoundError(client_error.details)
+                raise NotFoundError(client_error.details)
             elif client_error.status_code == status.HTTP_409_CONFLICT:
                 raise IncompatibleSchemaVersion(client_error.details)
             elif client_error.status_code == 422:
-                raise InvalidAvroSchema(client_error.details)
+                raise DataProcessingError(client_error.details)
             else:
                 raise SchemaRegistryUnavailable(client_error.details)
+        except Exception as e:
+            raise SchemaRegistryError(
+                {"error": str(e)}, "Something went unexpectedly wrong"
+            )
         return response
 
     return wrapper
