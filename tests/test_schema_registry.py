@@ -4,10 +4,10 @@ import status
 
 from confluent_avro.schema_registry import CompatibilityLevel, SchemaRegistry
 from confluent_avro.schema_registry.errors import (
+    DataProcessingError,
     IncompatibleSchemaVersion,
-    InvalidAvroSchema,
-    InvalidCompatibilityLevel,
-    SchemaNotFoundError,
+    NotFoundError,
+    SchemaRegistryError,
     SchemaRegistryNetworkError,
     SchemaRegistryUnavailable,
     UnauthorizedAccess,
@@ -53,7 +53,7 @@ def test_get_schema_invalid_id(registry_client):
         status=status.HTTP_404_NOT_FOUND,
     )
 
-    with pytest.raises(SchemaNotFoundError) as e:
+    with pytest.raises(NotFoundError) as e:
         registry_client.get_schema(invalid_schema_id)
     assert e.value.status_code == status.HTTP_404_NOT_FOUND
     assert e.value.client_error.get("message") == "Invalid ID"
@@ -106,7 +106,7 @@ def test_get_schema_id_invalid_subject(registry_client, employee_schema):
         json={"message": "Subject not found"},
         status=status.HTTP_404_NOT_FOUND,
     )
-    with pytest.raises(SchemaNotFoundError) as e:
+    with pytest.raises(NotFoundError) as e:
         registry_client.get_schema_id(invalid_subject, employee_schema)
     assert e.value.status_code == status.HTTP_404_NOT_FOUND
     assert e.value.client_error.get("message") == "Subject not found"
@@ -120,7 +120,7 @@ def test_get_schema_id_schema_not_registred(registry_client, employee_schema):
         json={"message": "Schema not found"},
         status=status.HTTP_404_NOT_FOUND,
     )
-    with pytest.raises(SchemaNotFoundError) as e:
+    with pytest.raises(NotFoundError) as e:
         registry_client.get_schema_id(SUBJECT, employee_schema)
     assert e.value.status_code == status.HTTP_404_NOT_FOUND
     assert e.value.client_error.get("message") == "Schema not found"
@@ -169,7 +169,7 @@ def test_register_schema_schema_invalid(registry_client, employee_schema):
         status=422,
     )
 
-    with pytest.raises(InvalidAvroSchema) as e:
+    with pytest.raises(DataProcessingError) as e:
         registry_client.register_schema(SUBJECT, "invalid_avro_schema")
 
     assert e.value.status_code == status.HTTP_400_BAD_REQUEST
@@ -194,7 +194,7 @@ def test_get_default_compatibility_success(registry_client):
     responses.add(
         responses.GET,
         f"{SCHEMA_REGISTRY_URL}/config",
-        json={"compatibility": "forward"},
+        json={"compatibilityLevel": "forward"},
         status=status.HTTP_200_OK,
     )
     compatibility = registry_client.get_default_compatibility()
@@ -207,11 +207,25 @@ def test_get_subject_compatibility_success(registry_client):
     responses.add(
         responses.GET,
         f"{SCHEMA_REGISTRY_URL}/config/{subject_name}",
-        json={"compatibility": "full"},
+        json={"compatibilityLevel": "full"},
         status=status.HTTP_200_OK,
     )
     compatibility = registry_client.get_subject_compatibility(subject_name)
     assert compatibility == CompatibilityLevel.FULL
+
+
+@responses.activate
+def test_get_subject_compatibility_broken_api(registry_client):
+    subject_name = "subject_x"
+    responses.add(
+        responses.GET,
+        f"{SCHEMA_REGISTRY_URL}/config/{subject_name}",
+        json={"compatibility": "full"},
+        status=status.HTTP_200_OK,
+    )
+    with pytest.raises(SchemaRegistryError) as e:
+        registry_client.get_subject_compatibility(subject_name)
+        assert e.message == "Something went unexpectedly wrong"
 
 
 @responses.activate
@@ -225,8 +239,15 @@ def test_set_default_compatibility_success(registry_client):
     registry_client.set_default_compatibility(CompatibilityLevel.FORWARD_TRANSITIVE)
 
 
+@responses.activate
 def test_set_default_compatibility_invalid_level(registry_client):
-    with pytest.raises(InvalidCompatibilityLevel):
+    responses.add(
+        responses.PUT,
+        f"{SCHEMA_REGISTRY_URL}/config",
+        json={"error_code": 42203},
+        status=422,
+    )
+    with pytest.raises(DataProcessingError):
         registry_client.set_default_compatibility("random_value")
 
 
@@ -244,6 +265,14 @@ def test_set_subject_compatibility_success(registry_client):
     )
 
 
+@responses.activate
 def test_set_subject_compatibility_invalid_level(registry_client):
-    with pytest.raises(InvalidCompatibilityLevel):
-        registry_client.set_subject_compatibility("random_subject", "random_value")
+    subject_name = "subject_x"
+    responses.add(
+        responses.PUT,
+        f"{SCHEMA_REGISTRY_URL}/config/{subject_name}",
+        json={"error_code": 42203},
+        status=422,
+    )
+    with pytest.raises(DataProcessingError):
+        registry_client.set_subject_compatibility(subject_name, "random_value")
