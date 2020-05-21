@@ -10,4 +10,4 @@ from confluent_avro.serde import AvroKeySerde, AvroKeyValueSerde, AvroValueSerde
 
 __all__ = ["AvroKeySerde", "AvroValueSerde", "AvroKeyValueSerde", "SchemaRegistry"]
 
-__version__ = "1.7.0"
+__version__ = "1.8.0"
